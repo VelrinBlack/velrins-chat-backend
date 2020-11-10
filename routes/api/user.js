@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
   }
 
   if (await User.findOne({ email })) {
-    return res.status(400).send('User already exists');
+    return res.send('User already exists');
   }
 
   const hashedPassword = await bcrypt.hash(password, 6);
@@ -32,9 +32,32 @@ router.post('/register', async (req, res) => {
     return res.status(500).send('Database error');
   }
 
-  const token = jwt.sign({ name, surname, email, password }, 'velrins-secret');
+  const token = jwt.sign({ email, password }, 'velrins-secret');
 
   res.json({ token });
+});
+
+router.post('/authenticate', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400).send('Invalid parameters');
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.send('Invalid email or password');
+  }
+
+  const correctPassword = await bcrypt.compare(password, user.password);
+
+  if (!correctPassword) {
+    return res.send('Invalid email or password');
+  }
+
+  const token = jwt.sign({ email, password }, 'velrins-secret');
+  return res.json({ token });
 });
 
 export default router;
