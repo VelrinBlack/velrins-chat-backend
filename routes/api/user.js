@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import User from '../../models/User.js';
+import auth from '../../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ router.post('/register', async (req, res) => {
     surname,
     email,
     password: hashedPassword,
+    activated: false,
   });
 
   try {
@@ -34,14 +36,14 @@ router.post('/register', async (req, res) => {
 
   const token = jwt.sign({ email, password }, 'velrins-secret');
 
-  res.json({ token });
+  return res.json({ token });
 });
 
-router.post('/authenticate', async (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    res.status(400).send('Invalid parameters');
+    return res.status(400).send('Invalid parameters');
   }
 
   const user = await User.findOne({ email });
@@ -58,6 +60,20 @@ router.post('/authenticate', async (req, res) => {
 
   const token = jwt.sign({ email, password }, 'velrins-secret');
   return res.json({ token });
+});
+
+router.post('/authorizate', auth, async (req, res) => {
+  const user = await User.findOne({ email: req.body.userEmail });
+
+  if (!user) {
+    return res.status(400).send('User not found');
+  }
+
+  if (!user.activated) {
+    return res.send('User is not activated');
+  }
+
+  return res.send('Authorizated successfully');
 });
 
 export default router;
