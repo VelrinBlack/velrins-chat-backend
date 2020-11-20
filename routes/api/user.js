@@ -70,10 +70,15 @@ router.post('/authorizate', auth, async (req, res) => {
   }
 
   if (!user.activated) {
-    return res.send('User is not activated');
+    return res.json({
+      message: 'User not activated',
+      email: user.email,
+    });
   }
 
-  return res.send('Authorizated successfully');
+  return res.json({
+    message: 'Authorizated successfully',
+  });
 });
 
 export default router;
