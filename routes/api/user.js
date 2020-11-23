@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
     return res.status(500).send('Database error');
   }
 
-  const token = jwt.sign({ email, password }, 'velrins-secret');
+  const token = jwt.sign({ email, password }, process.env.JWT_SECRET);
 
   return res.json({ token });
 });
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
     return res.send('Invalid email or password');
   }
 
-  const token = jwt.sign({ email, password }, 'velrins-secret');
+  const token = jwt.sign({ email, password }, process.env.JWT_SECRET);
   return res.json({ token });
 });
 
