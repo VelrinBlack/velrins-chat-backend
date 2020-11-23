@@ -1,6 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import fs from 'fs';
+import ejs from 'ejs';
 
 import User from '../../models/User.js';
 import auth from '../../middlewares/auth.js';
@@ -20,12 +23,20 @@ router.post('/register', async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 6);
 
+  const numbers = '1234567890';
+  let activationCode = '';
+
+  for (let i = 0; i < 5; i++) {
+    activationCode += numbers[Math.floor(Math.random() * numbers.length)];
+  }
+
   const user = new User({
     name,
     surname,
     email,
     password: hashedPassword,
     activated: false,
+    activationCode,
   });
 
   try {
@@ -79,6 +90,39 @@ router.post('/authorizate', auth, async (req, res) => {
   return res.json({
     message: 'Authorizated successfully',
   });
+});
+
+router.post('/sendmail', auth, async (req, res) => {
+  const user = await User.findOne({ email: req.body.userEmail });
+
+  let transporter = await nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.NODEMAILER_EMAIL,
+      pass: process.env.NODEMAILER_PASSWORD,
+    },
+  });
+
+  const emailContent = fs.readFileSync('src/mail.ejs', 'utf8');
+  const populatedEmailContent = ejs.render(emailContent, {
+    userName: user.name,
+    activationCode: user.activationCode,
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `Velrin's Chat <${process.env.NODEMAILER_EMAIL}>`,
+      to: user.email,
+      subject: 'Activate Your account',
+      html: populatedEmailContent,
+    });
+  } catch (err) {
+    return res.status(500).send('Internal server error');
+  }
+
+  return res.send('Email sent');
 });
 
 export default router;
