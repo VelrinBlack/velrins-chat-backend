@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   password: String,
   activated: Boolean,
   activationCode: String,
+  verificationEmailSent: Boolean,
 });
 
 const User = mongoose.model('User', UserSchema);

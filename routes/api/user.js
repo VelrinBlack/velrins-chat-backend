@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
     password: hashedPassword,
     activated: false,
     activationCode,
+    verificationEmailSent: false,
   });
 
   try {
@@ -92,8 +93,12 @@ router.post('/authorizate', auth, async (req, res) => {
   });
 });
 
-router.post('/sendmail', auth, async (req, res) => {
+router.post('/sendmail/verification', auth, async (req, res) => {
   const user = await User.findOne({ email: req.body.userEmail });
+
+  if (user.verificationEmailSent && !req.body.force) {
+    return res.send('Email already sent');
+  }
 
   let transporter = await nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -120,6 +125,13 @@ router.post('/sendmail', auth, async (req, res) => {
     });
   } catch (err) {
     return res.status(500).send('Internal server error');
+  }
+
+  try {
+    user.verificationEmailSent = true;
+    user.save();
+  } catch (error) {
+    return res.status(500).send('Database error');
   }
 
   return res.send('Email sent');
