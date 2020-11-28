@@ -93,6 +93,37 @@ router.post('/authorizate', auth, async (req, res) => {
   });
 });
 
+router.post('/activate', auth, async (req, res) => {
+  const user = await User.findOne({ email: req.body.userEmail });
+
+  if (!user) {
+    return res.status(400).send('User not found');
+  }
+
+  const code = req.body.code;
+
+  if (!code) {
+    return res.status(400).send('Activation code not provided');
+  }
+
+  if (code !== user.activationCode) {
+    return res.send('Invalid verification code');
+  }
+
+  try {
+    user.activated = true;
+    user.save();
+  } catch (error) {
+    return res.status(500).send('Database error');
+  }
+
+  return res.json({
+    name: user.name,
+    surname: user.surname,
+    email: user.email,
+  });
+});
+
 router.post('/sendmail/verification', auth, async (req, res) => {
   const user = await User.findOne({ email: req.body.userEmail });
 
