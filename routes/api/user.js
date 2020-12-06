@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
 
   const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
-  return res.satus(201).json({ message: 'User registered successfully', token });
+  return res.status(201).json({ message: 'User registered successfully', token });
 });
 
 router.post('/login', async (req, res) => {
@@ -62,7 +62,7 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
-  return res.satus(200).json({ message: 'Logged in successfully', token });
+  return res.status(200).json({ message: 'Logged in successfully', token });
 });
 
 router.post('/authorizate', auth, async (req, res) => {
