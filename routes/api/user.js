@@ -13,11 +13,11 @@ router.post('/register', async (req, res) => {
   const { name, surname, email, password } = req.body;
 
   if (!name || !surname || !email || !password) {
-    return res.status(400).json({ message: 'Invalid parameters' });
+    return res.status(400).json({ info: 'Invalid parameters' });
   }
 
   if (await User.findOne({ email })) {
-    return res.status(409).json({ message: 'User already exists' });
+    return res.status(409).json({ info: 'User already exists' });
   }
 
   const user = new User({
@@ -33,54 +33,54 @@ router.post('/register', async (req, res) => {
   try {
     user.save();
   } catch (error) {
-    return res.status(500).json({ message: 'Database error' });
+    return res.status(500).json({ info: 'Database error' });
   }
 
   const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
-  return res.status(201).json({ message: 'User registered successfully', token });
+  return res.status(201).json({ info: 'User registered successfully', token });
 });
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Invalid parameters' });
+    return res.status(400).json({ info: 'Invalid parameters' });
   }
 
   const user = await User.findOne({ email });
 
   if (!user) {
-    return res.status(401).json({ message: 'Invalid email or password' });
+    return res.status(401).json({ info: 'Invalid email or password' });
   }
 
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
   if (!isPasswordCorrect) {
-    return res.status(401).json({ message: 'Invalid email or password' });
+    return res.status(401).json({ info: 'Invalid email or password' });
   }
 
   const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
-  return res.status(200).json({ message: 'Logged in successfully', token });
+  return res.status(200).json({ info: 'Logged in successfully', token });
 });
 
 router.post('/authorizate', auth, async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return res.status(400).json({ message: 'User not found' });
+    return res.status(400).json({ info: 'User not found' });
   }
 
   if (!user.activated) {
     return res.status(403).json({
-      message: 'User not activated',
+      info: 'User not activated',
       email: user.email,
     });
   }
 
   return res.status(200).json({
-    message: 'Authorizated successfully',
+    info: 'Authorizated successfully',
   });
 });
 
@@ -88,11 +88,11 @@ router.post('/send-verification-mail', auth, async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return res.status(400).json({ message: 'User not found' });
+    return res.status(400).json({ info: 'User not found' });
   }
 
   if (user.verificationEmailSent && !req.body.force) {
-    return res.status(409).json({ message: 'Email already sent' });
+    return res.status(409).json({ info: 'Email already sent' });
   }
 
   let transporter = await nodemailer.createTransport({
@@ -113,7 +113,7 @@ router.post('/send-verification-mail', auth, async (req, res) => {
       html: generateVerificationMailContent(user),
     });
   } catch (err) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ info: 'Internal server error' });
   }
 
   user.verificationEmailSent = true;
@@ -121,7 +121,7 @@ router.post('/send-verification-mail', auth, async (req, res) => {
   try {
     user.save();
   } catch (error) {
-    return res.status(500).json({ message: 'Database error' });
+    return res.status(500).json({ info: 'Database error' });
   }
 
   return res.send('Email sent');
@@ -131,28 +131,28 @@ router.post('/activate', auth, async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return res.status(400).json({ message: 'User not found' });
+    return res.status(400).json({ info: 'User not found' });
   }
 
   const code = req.body.code;
 
   if (!code) {
-    return res.status(400).json({ message: 'Activation code not provided' });
+    return res.status(400).json({ info: 'Activation code not provided' });
   }
 
   if (code !== user.activationCode) {
-    return res.status(401).json({ message: 'Invalid verification code' });
+    return res.status(401).json({ info: 'Invalid verification code' });
   }
 
   try {
     user.activated = true;
     user.save();
   } catch (error) {
-    return res.status(500).json({ message: 'Database error' });
+    return res.status(500).json({ info: 'Database error' });
   }
 
   return res.status(200).json({
-    message: 'User activated successfully',
+    info: 'User activated successfully',
   });
 });
 
