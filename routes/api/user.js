@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
     return res.status(500).json({ info: 'Database error' });
   }
 
-  const token = jwt.sign({ email }, process.env.JWT_SECRET);
+  const token = jwt.sign({ email, id: user.id }, process.env.JWT_SECRET);
 
   return res.status(201).json({ info: 'User registered successfully', token });
 });
@@ -60,13 +60,13 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ info: 'Invalid email or password' });
   }
 
-  const token = jwt.sign({ email }, process.env.JWT_SECRET);
+  const token = jwt.sign({ email, id: user.id }, process.env.JWT_SECRET);
 
   return res.status(200).json({ info: 'Logged in successfully', token });
 });
 
 router.post('/authorizate', auth, async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.user.email });
 
   if (!user) {
     return res.status(400).json({ info: 'User not found' });
@@ -85,7 +85,7 @@ router.post('/authorizate', auth, async (req, res) => {
 });
 
 router.post('/send-verification-mail', auth, async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.user.email });
 
   if (!user) {
     return res.status(400).json({ info: 'User not found' });
@@ -128,7 +128,7 @@ router.post('/send-verification-mail', auth, async (req, res) => {
 });
 
 router.post('/activate', auth, async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.user.email });
 
   if (!user) {
     return res.status(400).json({ info: 'User not found' });
@@ -154,6 +154,17 @@ router.post('/activate', auth, async (req, res) => {
   return res.status(200).json({
     info: 'User activated successfully',
   });
+});
+
+router.get('/getOne', auth, async (req, res) => {
+  const user = await User.findById(req.body.user.id);
+
+  if (!user) {
+    return res.status(400).json({ info: 'User not found' });
+  }
+
+  const { name, surname, email, _id } = user;
+  return res.status(200).json({ name, surname, email, id: _id });
 });
 
 export default router;
