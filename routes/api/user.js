@@ -159,12 +159,8 @@ router.post('/activate', auth, async (req, res) => {
 router.get('/getOne', auth, async (req, res) => {
   const user = await User.findById(req.body.user.id);
 
-  if (!user) {
-    return res.status(400).json({ info: 'User not found' });
-  }
-
   const { name, surname, email, _id } = user;
-  return res.status(200).json({ name, surname, email, id: _id });
+  return res.status(200).json({ user: { name, surname, email, id: _id } });
 });
 
 export default router;
