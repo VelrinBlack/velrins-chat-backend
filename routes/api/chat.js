@@ -6,14 +6,6 @@ import auth from '../../middlewares/auth.js';
 
 const router = express.Router();
 
-const pusher = new Pusher({
-  appId: '1124642',
-  key: 'ed13948a7c4618e48dbc',
-  secret: '2dc7743929626c29eb5a',
-  cluster: 'us3',
-  useTLS: true,
-});
-
 router.get('/getAll', auth, async (req, res) => {
   const chats = await Chat.find({ users: { _id: req.body.user.id } }).populate('users');
 
@@ -35,6 +27,14 @@ router.get('/getAll', auth, async (req, res) => {
 });
 
 router.post('/createMessage', auth, async (req, res) => {
+  const pusher = new Pusher({
+    appId: process.env.PUSHER_APP_ID,
+    key: process.env.PUSHER_KEY,
+    secret: process.env.PUSHER_SECRET,
+    cluster: 'us3',
+    useTLS: true,
+  });
+
   const { chatId, userId, content } = req.body;
 
   if (!chatId || !userId || !content) {
