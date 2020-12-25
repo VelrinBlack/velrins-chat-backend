@@ -6,7 +6,7 @@ import auth from '../../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/getAll', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   const chats = await Chat.find({ users: { _id: req.body.user.id } }).populate('users');
 
   if (!chats) {
@@ -26,7 +26,7 @@ router.get('/getAll', auth, async (req, res) => {
   return res.status(200).json({ chats });
 });
 
-router.post('/createMessage', auth, async (req, res) => {
+router.post('/message', auth, async (req, res) => {
   const pusher = new Pusher({
     appId: process.env.PUSHER_APP_ID,
     key: process.env.PUSHER_KEY,
