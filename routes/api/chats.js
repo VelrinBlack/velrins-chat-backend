@@ -1,9 +1,17 @@
-import express from 'express';
-import Pusher from 'pusher';
+const express = require('express');
+const Pusher = require('pusher');
 
-import Chat from '../../models/Chat.js';
-import User from '../../models/User.js';
-import auth from '../../middlewares/auth.js';
+const Chat = require('../../models/Chat.js');
+const User = require('../../models/User.js');
+const auth = require('../../middlewares/auth.js');
+
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: 'us3',
+  useTLS: true,
+});
 
 const router = express.Router();
 
@@ -28,7 +36,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 router.post('/', auth, async (req, res) => {
-  if (!req.body.email) {
+  if (!req.body.email || req.body.email === req.body.user.email) {
     return res.status(400).json({ info: 'Invalid parameters' });
   }
 
@@ -69,18 +77,11 @@ router.post('/', auth, async (req, res) => {
       },
     ],
     messages: [],
+    _id: chat._id,
   });
 });
 
 router.post('/message', auth, async (req, res) => {
-  const pusher = new Pusher({
-    appId: process.env.PUSHER_APP_ID,
-    key: process.env.PUSHER_KEY,
-    secret: process.env.PUSHER_SECRET,
-    cluster: 'us3',
-    useTLS: true,
-  });
-
   const { chatId, userId, content } = req.body;
 
   if (!chatId || !userId || !content) {
@@ -107,4 +108,4 @@ router.post('/message', auth, async (req, res) => {
   res.status(200).send({ info: 'Message sent successfully' });
 });
 
-export default router;
+module.exports = router;

@@ -1,11 +1,14 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
-import User from '../../models/User.js';
-import auth from '../../middlewares/auth.js';
-import { generateActivationCode, generateVerificationMailContent } from '../../utilities/user.js';
+const User = require('../../models/User.js');
+const auth = require('../../middlewares/auth.js');
+const {
+  generateActivationCode,
+  generateVerificationMailContent,
+} = require('../../utilities/user.js');
 
 const router = express.Router();
 
@@ -163,4 +166,4 @@ router.get('/:token', auth, async (req, res) => {
   return res.status(200).json({ user: { name, surname, email, id: _id } });
 });
 
-export default router;
+module.exports = router;

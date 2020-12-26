@@ -1,7 +1,7 @@
-import fs from 'fs';
-import ejs from 'ejs';
+const fs = require('fs');
+const ejs = require('ejs');
 
-export const generateActivationCode = () => {
+module.exports.generateActivationCode = () => {
   const numbers = '1234567890';
   let activationCode = '';
 
@@ -12,7 +12,7 @@ export const generateActivationCode = () => {
   return activationCode;
 };
 
-export const generateVerificationMailContent = (user) => {
+module.exports.generateVerificationMailContent = (user) => {
   const emailContent = fs.readFileSync('src/mail.ejs', 'utf8');
 
   const populatedEmailContent = ejs.render(emailContent, {
