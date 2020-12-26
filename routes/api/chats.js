@@ -2,6 +2,7 @@ import express from 'express';
 import Pusher from 'pusher';
 
 import Chat from '../../models/Chat.js';
+import User from '../../models/User.js';
 import auth from '../../middlewares/auth.js';
 
 const router = express.Router();
@@ -24,6 +25,51 @@ router.get('/', auth, async (req, res) => {
   }
 
   return res.status(200).json({ chats });
+});
+
+router.post('/', auth, async (req, res) => {
+  if (!req.body.email) {
+    return res.status(400).json({ info: 'Invalid parameters' });
+  }
+
+  const user1 = await User.findOne({ email: req.body.user.email });
+  if (!user1) {
+    return res.status(500).json({ info: 'Internal server error' });
+  }
+
+  const user2 = await User.findOne({ email: req.body.email });
+  if (!user2) {
+    return res.status(400).json({ info: 'Invalid email' });
+  }
+
+  const chat = new Chat({
+    users: [user1._id, user2._id],
+    messages: [],
+  });
+
+  try {
+    chat.save();
+  } catch (error) {
+    return res.status(500).json({ info: 'Database error' });
+  }
+
+  return res.status(201).json({
+    users: [
+      {
+        _id: user1._id,
+        name: user1.name,
+        surname: user1.surname,
+        email: user1.email,
+      },
+      {
+        _id: user2._id,
+        name: user2.name,
+        surname: user2.surname,
+        email: user2.email,
+      },
+    ],
+    messages: [],
+  });
 });
 
 router.post('/message', auth, async (req, res) => {
