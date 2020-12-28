@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 const User = require('../../models/User.js');
 const auth = require('../../middlewares/auth.js');
@@ -98,31 +98,21 @@ router.post('/send-verification-mail', auth, async (req, res) => {
     return res.status(409).json({ info: 'Email already sent' });
   }
 
-  let transporter = await nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.NODEMAILER_EMAIL,
-      pass: process.env.NODEMAILER_PASSWORD,
-    },
-  });
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-  try {
-    await transporter.sendMail({
-      from: `Velrin's Chat <${process.env.NODEMAILER_EMAIL}>`,
-      to: user.email,
-      subject: 'Activate Your account',
-      html: generateVerificationMailContent(user),
-    });
-  } catch (err) {
-    return res.status(500).json({ info: 'Internal server error' });
-  }
+  const msg = {
+    to: user.email,
+    from: process.env.SENDGRID_EMAIL,
+    subject: 'Activate Your account',
+    html: generateVerificationMailContent(user),
+  };
+
+  await sgMail.send(msg);
 
   user.verificationEmailSent = true;
 
   try {
-    user.save();
+    await user.save();
   } catch (error) {
     return res.status(500).json({ info: 'Database error' });
   }
