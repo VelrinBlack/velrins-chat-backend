@@ -149,7 +149,7 @@ router.patch('/activate', auth, async (req, res) => {
   });
 });
 
-router.get('/:token', auth, async (req, res) => {
+router.get('/getOne', auth, async (req, res) => {
   const user = await User.findById(req.body.user.id);
 
   const { name, surname, email, _id } = user;
