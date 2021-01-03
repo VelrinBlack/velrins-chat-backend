@@ -81,6 +81,30 @@ router.post('/', auth, async (req, res) => {
   });
 });
 
+router.delete('/:chatId', auth, async (req, res) => {
+  const { chatId } = req.params;
+
+  if (!chatId) {
+    return res.status(400).json({ info: 'Invalid parameters' });
+  }
+
+  if (chatId.length !== 24) {
+    return res.status(400).json({ info: 'Invalid chat ID' });
+  }
+
+  try {
+    const chat = await Chat.findByIdAndRemove(chatId);
+
+    if (!chat) {
+      return res.status(400).json({ info: 'Invalid chat ID' });
+    }
+  } catch (err) {
+    return res.status(500).json({ info: 'Database error' });
+  }
+
+  return res.status(200).json({ info: 'Chat successfully deleted' });
+});
+
 router.post('/message', auth, async (req, res) => {
   const { chatId, userId, content } = req.body;
 
