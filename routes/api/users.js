@@ -156,4 +156,20 @@ router.get('/getOne', auth, async (req, res) => {
   return res.status(200).json({ user: { name, surname, email, id: _id } });
 });
 
+router.put('/updateOne', auth, async (req, res) => {
+  const { id, name, surname } = req.body;
+
+  if (!id || !name || !surname) {
+    return res.status(400).json({ info: 'Invalid parameters' });
+  }
+
+  try {
+    await User.findByIdAndUpdate(id, { name, surname });
+  } catch (err) {
+    return res.status(500).json({ info: 'Database error' });
+  }
+
+  return res.status(200).send({ info: 'User updated successfully' });
+});
+
 module.exports = router;
