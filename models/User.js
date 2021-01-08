@@ -5,6 +5,10 @@ const UserSchema = new mongoose.Schema({
   surname: String,
   email: String,
   password: String,
+  image: {
+    type: String,
+    default: '',
+  },
   activated: Boolean,
   activationCode: String,
   verificationEmailSent: Boolean,

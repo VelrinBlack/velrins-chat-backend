@@ -162,19 +162,19 @@ router.patch('/activate', auth, async (req, res) => {
 router.get('/getOne', auth, async (req, res) => {
   const user = await User.findById(req.body.user.id);
 
-  const { name, surname, email, _id } = user;
-  return res.status(200).json({ user: { name, surname, email, id: _id } });
+  const { name, surname, email, image, _id } = user;
+  return res.status(200).json({ user: { name, surname, email, image, id: _id } });
 });
 
 router.put('/updateOne', auth, async (req, res) => {
-  const { id, name, surname } = req.body;
+  const { id, name, surname, image } = req.body;
 
   if (!id || !name || !surname) {
     return res.status(400).json({ info: 'Invalid parameters' });
   }
 
   try {
-    await User.findByIdAndUpdate(id, { name, surname });
+    await User.findByIdAndUpdate(id, { name, surname, image });
   } catch (err) {
     return res.status(500).json({ info: 'Database error' });
   }

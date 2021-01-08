@@ -4,6 +4,7 @@ const Pusher = require('pusher');
 const Chat = require('../../models/Chat.js');
 const User = require('../../models/User.js');
 const auth = require('../../middlewares/auth.js');
+const { use } = require('./users.js');
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -68,12 +69,14 @@ router.post('/', auth, async (req, res) => {
         name: user1.name,
         surname: user1.surname,
         email: user1.email,
+        image: user1.image,
       },
       {
         _id: user2._id,
         name: user2.name,
         surname: user2.surname,
         email: user2.email,
+        image: user2.image,
       },
     ],
     messages: [],
